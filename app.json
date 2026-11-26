@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "Jugnu",
+    "slug": "jugnu",
+    "version": "1.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "jugnu",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F4F5F9",
+    "android": {
+      "package": "app.jugnu",
+      "versionCode": 4,
+      "adaptiveIcon": {
+        "backgroundColor": "#0F1A3C",
+        "foregroundImage": "./assets/adaptive-foreground.png",
+        "monochromeImage": "./assets/adaptive-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0F1A3C",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 120
+        }
+      ],
+      "expo-sqlite",
+      "./plugins/with-jugnu-activity.cjs",
+      "./plugins/with-jugnu-signing.cjs",
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Jugnu reads a prescription photo you pick to set up its reminders.",
+          "cameraPermission": "Jugnu uses the camera to scan a prescription.",
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}

@@ -1,0 +1,19 @@
+node_modules/
+.expo/
+dist/
+/android/
+/ios/
+*.log
+.DS_Store
+modules/*/android/build/
+keys/
+dist/
+
+# Private: never in the public repo
+src/core/seed-personal.ts
+.env.local
+*.jks
+*.keystore
+*.apk
+site/
+supabase/.temp/
