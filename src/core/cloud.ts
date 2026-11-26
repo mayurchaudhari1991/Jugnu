@@ -123,9 +123,7 @@ export async function signInWithGoogle(): Promise<boolean> {
     if (failed) throw new Error(failed.replace(/\+/g, ' '));
     const code = url.searchParams.get('code');
     if (!code) throw new Error('Google sign-in did not finish. Please try again.');
-    const { error: exErr } = await supabase.auth.exchangeCodeForSession(code);
-    if (exErr) throw exErr;
-    await refreshProfile();
+    await finishSignIn(code);
     return true;
   } catch (e) {
     useAccount.setState({ error: friendly(e instanceof Error ? e.message : String(e)) });
@@ -133,6 +131,23 @@ export async function signInWithGoogle(): Promise<boolean> {
   } finally {
     useAccount.setState({ busy: false });
   }
+}
+
+const usedCodes = new Set<string>();
+/**
+ * Turns the code Google sent back into a session. Some phones (OnePlus/ColorOS) hand the
+ * jugnu://auth-callback link to the app itself instead of the browser tab, so this runs from
+ * both signInWithGoogle and the auth-callback screen; a code is only used once.
+ */
+export async function finishSignIn(code: string) {
+  if (usedCodes.has(code)) return;
+  usedCodes.add(code);
+  const { data } = await supabase.auth.getSession();
+  if (!data.session) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error && !(await supabase.auth.getSession()).data.session) throw error;
+  }
+  await refreshProfile();
 }
 
 export async function signOut() {

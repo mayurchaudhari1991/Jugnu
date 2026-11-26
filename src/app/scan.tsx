@@ -2,10 +2,11 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Image, Pressable, ToastAndroid, View } from 'react-native';
+import { Image, Pressable, ToastAndroid, View } from 'react-native';
 import { applyScan, PARTS, type Part } from '@/core/ai-apply';
 import { AiError, planActive, planText, scanPrescription, signInWithGoogle, useAccount, type ScanItem } from '@/core/cloud';
 import { syncAlarms } from '@/core/engine';
+import { FireflyLoader } from '@/ui/FireflyLoader';
 import { Icon } from '@/ui/icons';
 import { Banner, Btn, Card, Chip, Field, Label, Screen } from '@/ui/kit';
 import { C } from '@/ui/theme';
@@ -228,11 +229,11 @@ export default function Scan() {
 
       {photos.length > 0 ? (
         reading ? (
-          <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-            <ActivityIndicator color={C.ink} />
-            <View style={{ flex: 1 }}>
-              <Txt size={15} weight="bold">
-                Reading your prescription…
+          <Card style={{ alignItems: 'center', gap: 14, paddingVertical: 24 }}>
+            <FireflyLoader size={132} />
+            <View style={{ alignItems: 'center', gap: 2 }}>
+              <Txt size={16} weight="heavy">
+                Jugnu is reading your prescription…
               </Txt>
               <Txt size={12.5} color={C.ink2}>
                 Usually 10–30 seconds.

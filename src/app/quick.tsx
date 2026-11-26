@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { View } from 'react-native';
 import { applyReminder } from '@/core/ai-apply';
 import { AiError, parseReminder, planActive, signInWithGoogle, useAccount } from '@/core/cloud';
 import { syncAlarms } from '@/core/engine';
+import { FireflyLoader } from '@/ui/FireflyLoader';
 import { Banner, Btn, Card, Chip, Field, Screen } from '@/ui/kit';
 import { C } from '@/ui/theme';
 import { TopBar } from '@/ui/TopBar';
@@ -63,10 +64,10 @@ export default function Quick() {
           </View>
           {error ? <Banner text={error} action="" onPress={() => setError(null)} /> : null}
           {busy ? (
-            <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              <ActivityIndicator color={C.ink} />
+            <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <FireflyLoader size={64} />
               <Txt size={15} weight="bold">
-                Setting it up…
+                Jugnu is setting it up…
               </Txt>
             </Card>
           ) : (

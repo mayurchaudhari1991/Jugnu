@@ -92,6 +92,7 @@ export default function RootLayout() {
         <Stack.Screen name="scan" />
         <Stack.Screen name="quick" />
         <Stack.Screen name="admin" />
+        <Stack.Screen name="auth-callback" options={{ animation: "none" }} />
       </Stack>
     </SafeAreaProvider>
   );

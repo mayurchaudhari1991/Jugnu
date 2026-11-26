@@ -17,3 +17,4 @@ src/core/seed-personal.ts
 *.apk
 site/
 supabase/.temp/
+!docs/Jugnu.apk
