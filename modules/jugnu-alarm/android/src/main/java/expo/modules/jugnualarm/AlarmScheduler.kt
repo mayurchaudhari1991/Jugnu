@@ -52,6 +52,18 @@ object AlarmScheduler {
     )
   }
 
+  /** Full-screen intent: goes through AlarmDoorActivity so it can open over the lock screen. */
+  fun doorIntent(ctx: Context, alarm: JSONObject, requestCode: Int): PendingIntent {
+    val intent = Intent(ctx, AlarmDoorActivity::class.java)
+      .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      .putExtra(EXTRA_ALARM, alarm.toString())
+      .putExtra(EXTRA_ACTION, "open")
+    return PendingIntent.getActivity(
+      ctx, requestCode, intent,
+      PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    )
+  }
+
   /** Notification button that answers without opening the app (works on the lock screen). */
   fun answerIntent(ctx: Context, alarm: JSONObject, action: String, requestCode: Int): PendingIntent {
     val intent = Intent(ctx, ActionReceiver::class.java)

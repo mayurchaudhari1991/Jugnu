@@ -191,7 +191,19 @@ class AlarmService : Service() {
   private fun launchPage(alarm: JSONObject) {
     if (LaunchState.resumed || currentId != alarm.optString("id")) return
     val km = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-    val overlayOk = !km.isKeyguardLocked && (Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(this))
+    if (km.isKeyguardLocked) {
+      // A fresh activity is allowed through the lock screen; an existing page brought forward is not.
+      runCatching {
+        startActivity(
+          Intent(this, AlarmDoorActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .putExtra(AlarmScheduler.EXTRA_ALARM, alarm.toString())
+            .putExtra(AlarmScheduler.EXTRA_ACTION, "open"),
+        )
+      }
+      return
+    }
+    val overlayOk = Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(this)
     if (overlayOk) showPixel()
     handler.postDelayed({
       if (!LaunchState.resumed && currentId == alarm.optString("id")) {

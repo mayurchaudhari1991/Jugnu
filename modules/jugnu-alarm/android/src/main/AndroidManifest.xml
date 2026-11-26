@@ -14,6 +14,17 @@
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
   <application>
+    <!-- Opens the alarm page over the lock screen (see AlarmDoorActivity). -->
+    <activity
+      android:name="expo.modules.jugnualarm.AlarmDoorActivity"
+      android:exported="false"
+      android:showWhenLocked="true"
+      android:turnScreenOn="true"
+      android:excludeFromRecents="true"
+      android:noHistory="true"
+      android:launchMode="singleInstance"
+      android:taskAffinity="app.jugnu.alarmdoor"
+      android:theme="@android:style/Theme.Translucent.NoTitleBar" />
     <receiver
       android:name="expo.modules.jugnualarm.AlarmReceiver"
       android:exported="false" />

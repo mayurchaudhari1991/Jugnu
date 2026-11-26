@@ -149,12 +149,20 @@ class JugnuAlarmModule : Module() {
       mapOf(
         "notifications" to NotificationManagerCompat.from(context).areNotificationsEnabled(),
         "exact" to AlarmScheduler.canExact(context),
-        "fullScreen" to (Build.VERSION.SDK_INT < 34 || nm.canUseFullScreenIntent()),
+        "fullScreen" to canFullScreen(nm),
         "battery" to pm.isIgnoringBatteryOptimizations(context.packageName),
         "overlay" to (Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(context)),
         "popup" to AlarmNotifier.channelIsHigh(context),
         "screenOn" to canTurnScreenOn(),
       )
+    }
+
+    /** This build's version code, to notice app updates (phone makers reset settings on update). */
+    Function("appVersionCode") {
+      runCatching {
+        val info = context.packageManager.getPackageInfo(context.packageName, 0)
+        (if (Build.VERSION.SDK_INT >= 28) info.longVersionCode else @Suppress("DEPRECATION") info.versionCode.toLong()).toDouble()
+      }.getOrDefault(0.0)
     }
 
     /** Whether the last alarms made it over the lock screen (see AlarmService.recordLockResult). */
@@ -228,6 +236,22 @@ class JugnuAlarmModule : Module() {
       @Suppress("DEPRECATION")
       ops.unsafeCheckOpNoThrow("android:turn_screen_on", android.os.Process.myUid(), context.packageName) ==
         android.app.AppOpsManager.MODE_ALLOWED
+    }.getOrDefault(true)
+  }
+
+  /**
+   * Full-screen alarms. On OnePlus/Oppo/Realme the permission can read as granted while its switch
+   * sits in an in-between "default" state that the phone treats as denied; only an explicit allow counts.
+   */
+  private fun canFullScreen(nm: NotificationManager): Boolean {
+    if (Build.VERSION.SDK_INT < 34) return true
+    if (!nm.canUseFullScreenIntent()) return false
+    return runCatching {
+      val ops = context.getSystemService(android.app.AppOpsManager::class.java)
+      @Suppress("DEPRECATION")
+      val mode = ops.unsafeCheckOpNoThrow("android:use_full_screen_intent", android.os.Process.myUid(), context.packageName)
+      val strict = Build.MANUFACTURER.lowercase().let { it.contains("oneplus") || it.contains("oppo") || it.contains("realme") }
+      mode == android.app.AppOpsManager.MODE_ALLOWED || (mode == android.app.AppOpsManager.MODE_DEFAULT && !strict)
     }.getOrDefault(true)
   }
 }

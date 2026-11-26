@@ -31,6 +31,7 @@ export default function Today() {
   const snoozeMin = settings.snoozeMin;
   const { allOk } = usePermissions();
   const lockMiss = useLockMiss(now);
+  const needsMakerStep = !!makerTip() && settings.setupDone && !settings.oemDone;
   const [picked, setPicked] = useState<string | null>(null);
   const [sheet, setSheet] = useState<Dose | null>(null);
 
@@ -68,6 +69,12 @@ export default function Today() {
 
         {!allOk ? (
           <Banner text="Alarms can't fill your lock screen yet. A few phone settings need a tap." action="Fix" onPress={() => router.push('/settings')} />
+        ) : needsMakerStep ? (
+          <Banner
+            text={`Jugnu was updated. Please check "${makerTip()?.title}" is still on for Jugnu, so alarms keep working on the lock screen.`}
+            action="Fix"
+            onPress={() => router.push('/settings')}
+          />
         ) : lockMiss ? (
           <Banner
             text={lockMiss}

@@ -60,6 +60,7 @@ type JugnuAlarmNative = {
   openAppInfo(): void;
   openScreenOnSettings(): void;
   getLockHealth(): LockHealth;
+  appVersionCode(): number;
   clearLockHealth(): void;
   pickSystemSound(current: string): Promise<PickedSound | null>;
   pickFileSound(): Promise<PickedSound | null>;

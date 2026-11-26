@@ -1,5 +1,6 @@
 import Storage from 'expo-sqlite/kv-store';
 import { create } from 'zustand';
+import JugnuAlarm from '../../modules/jugnu-alarm';
 import { exampleConfig, seedConfig } from './seed';
 import { addDays, todayKey } from './time';
 import type { Config, DayLog, Item, LogEntry, Routine, Settings } from './types';
@@ -73,6 +74,7 @@ export const useStore = create<State>((set, get) => ({
   hydrate() {
     if (get().hydrated) return;
     set({ ...readConfig(), logs: readLogs(), hydrated: true, rev: get().rev + 1 });
+    noticeUpdate();
   },
 
   saveItem(item) {
@@ -148,4 +150,21 @@ export const useStore = create<State>((set, get) => ({
 export function getConfig(): Config {
   const s = useStore.getState();
   return { items: s.items, routines: s.routines, settings: s.settings };
+}
+
+const VERSION_KEY = 'jugnu:version';
+/**
+ * OnePlus/Oppo/Realme can put an app back on "Smart mode" (a reinstall always does), which stops the
+ * alarm page opening over the lock screen. After every update, ask the user to check the switch
+ * once more: the step shows as not done in Settings and Today until they tap "I've done this".
+ */
+function noticeUpdate() {
+  const now = JugnuAlarm?.appVersionCode?.() ?? 0;
+  if (!now) return;
+  const before = Number(Storage.getItemSync(VERSION_KEY) ?? 0);
+  if (before && before !== now) {
+    const st = useStore.getState();
+    if (st.settings.setupDone && st.settings.oemDone) st.setSettings({ oemDone: false });
+  }
+  Storage.setItemSync(VERSION_KEY, String(now));
 }

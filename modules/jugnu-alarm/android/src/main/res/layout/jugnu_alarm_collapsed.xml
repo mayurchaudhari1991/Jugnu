@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Collapsed alarm notification: Taken and Snooze visible without expanding, so they can be
+     pressed straight from the lock screen (OnePlus/ColorOS shows alarms collapsed there). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:minHeight="48dp"
+  android:gravity="center_vertical"
+  android:orientation="horizontal">
+
+  <LinearLayout
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:orientation="vertical"
+    android:paddingEnd="8dp">
+    <TextView
+      android:id="@+id/jugnu_title"
+      style="@android:style/TextAppearance.Material.Notification.Title"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:ellipsize="end"
+      android:maxLines="1"
+      android:textStyle="bold" />
+    <TextView
+      android:id="@+id/jugnu_text"
+      style="@android:style/TextAppearance.Material.Notification"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:ellipsize="end"
+      android:maxLines="1" />
+  </LinearLayout>
+
+  <TextView
+    android:id="@+id/jugnu_btn_snooze"
+    style="@android:style/TextAppearance.Material.Notification"
+    android:layout_width="wrap_content"
+    android:layout_height="36dp"
+    android:layout_marginEnd="6dp"
+    android:background="@drawable/jugnu_btn_outline"
+    android:gravity="center"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:textSize="13sp"
+    android:textStyle="bold" />
+
+  <TextView
+    android:id="@+id/jugnu_btn_done"
+    android:layout_width="wrap_content"
+    android:layout_height="36dp"
+    android:background="@drawable/jugnu_btn_primary"
+    android:gravity="center"
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp"
+    android:textColor="#0F1A3C"
+    android:textSize="13sp"
+    android:textStyle="bold" />
+</LinearLayout>

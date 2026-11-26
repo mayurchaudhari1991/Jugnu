@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
+import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -55,7 +56,9 @@ object AlarmNotifier {
     val nid = AlarmScheduler.notificationId(id)
     val base = (nid % 100000) * 10
     alarm.put("ring", ring)
-    val open = AlarmScheduler.launchIntent(ctx, alarm, "open", base)
+    // Tapping the notification goes through AlarmDoorActivity, which may open over the lock screen,
+    // so one tap on a locked phone shows the full alarm page without unlocking.
+    val open = AlarmScheduler.doorIntent(ctx, alarm, base)
     val done = AlarmScheduler.answerIntent(ctx, alarm, "done", base + 1)
     val snooze = AlarmScheduler.answerIntent(ctx, alarm, "snooze", base + 2)
     val skip = AlarmScheduler.answerIntent(ctx, alarm, "skip", base + 3)
@@ -67,13 +70,29 @@ object AlarmNotifier {
     val maxRings = alarm.optInt("maxRings", 3)
     val ringNote = if (ring > 1) " · ring $ring of $maxRings" else ""
     val time = DateFormat.getTimeInstance(DateFormat.SHORT).format(Date())
+    val doneLabel = alarm.optString("doneLabel", "Done")
+    val snoozeMin = alarm.optInt("snoozeMin", 10)
+
+    // Collapsed view with Taken and Snooze always visible: on the lock screen OnePlus/ColorOS shows
+    // alarms collapsed, hiding the normal action buttons behind a small arrow. These buttons send
+    // a broadcast, so they work without unlocking.
+    val collapsed = RemoteViews(ctx.packageName, R.layout.jugnu_alarm_collapsed).apply {
+      setTextViewText(R.id.jugnu_title, if (quiet) "Not answered: $title" else title)
+      setTextViewText(R.id.jugnu_text, if (quiet) "Rang at $time" else body.lineSequence().firstOrNull().orEmpty())
+      setTextViewText(R.id.jugnu_btn_done, "✓ $doneLabel")
+      setTextViewText(R.id.jugnu_btn_snooze, "Snooze $snoozeMin m")
+      setOnClickPendingIntent(R.id.jugnu_btn_done, done)
+      setOnClickPendingIntent(R.id.jugnu_btn_snooze, snooze)
+    }
 
     val builder = NotificationCompat.Builder(ctx, CHANNEL_ID)
       .setSmallIcon(R.drawable.ic_stat_jugnu)
       .setContentTitle(if (quiet) "Not answered: $title" else title)
       .setContentText(if (quiet) "Rang at $time. Tap to answer." else body)
       .setSubText(subtitle + ringNote)
-      .setStyle(NotificationCompat.BigTextStyle().bigText(if (quiet) "Rang at $time. Tap to answer.\n$body" else body))
+      .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+      .setCustomContentView(collapsed)
+      .setCustomHeadsUpContentView(collapsed)
       .setColor(color)
       .setCategory(NotificationCompat.CATEGORY_ALARM)
       .setPriority(if (quiet) NotificationCompat.PRIORITY_DEFAULT else NotificationCompat.PRIORITY_MAX)
@@ -82,12 +101,12 @@ object AlarmNotifier {
       .setAutoCancel(quiet)
       .setSilent(true)
       .setContentIntent(open)
-      .addAction(lockScreenAction(alarm.optString("doneLabel", "Done"), done))
-      .addAction(lockScreenAction("Snooze ${alarm.optInt("snoozeMin", 10)} min", snooze))
+      .addAction(lockScreenAction(doneLabel, done))
+      .addAction(lockScreenAction("Snooze $snoozeMin min", snooze))
       .addAction(lockScreenAction("Skip", skip))
       .setWhen(System.currentTimeMillis())
       .setShowWhen(true)
-    if (!quiet) builder.setFullScreenIntent(open, true)
+    if (!quiet) builder.setFullScreenIntent(AlarmScheduler.doorIntent(ctx, alarm, base + 4), true)
     return builder.build()
   }
 
